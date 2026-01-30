@@ -10,11 +10,14 @@ public class Player : MonoBehaviour
     public LayerMask groundLayer;
 
     private Rigidbody2D rb;
+    private Animator animator;
+
     private bool isGrounded;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
     }
 
     void Update()
@@ -27,6 +30,8 @@ public class Player : MonoBehaviour
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
         }
+
+        SetAnimation(moveInput);
     }
 
     private void FixedUpdate()
@@ -36,5 +41,31 @@ public class Player : MonoBehaviour
             groundCheckRadius,
             groundLayer
         );
+    }
+
+    private void SetAnimation(float moveInput)
+    {
+        if (isGrounded)
+        {
+            if (moveInput == 0)
+            {
+                animator.Play("Player_idle");
+            }
+            else
+            {
+                animator.Play("player_run");
+            }
+        }
+        else
+        {
+            if (rb.linearVelocity.y > 0)
+            {
+                animator.Play("player_jump");
+            }
+            else
+            {
+                animator.Play("player_fall");
+            }
+        }
     }
 }
