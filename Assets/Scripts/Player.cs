@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 
 public class Player : MonoBehaviour
@@ -7,6 +8,7 @@ public class Player : MonoBehaviour
     public int health = 100;
     public float moveSpeed = 5f;
     public float jumpForce = 10f;
+    public Image healthImage;
 
     public Transform groundCheck;
     public float groundCheckRadius = 0.2f;
@@ -56,6 +58,8 @@ void Update()
     }
 
     SetAnimation(moveInput);
+
+    healthImage.fillAmount = health / 100f;
 }
 
 
