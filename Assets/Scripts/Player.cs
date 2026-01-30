@@ -1,7 +1,10 @@
 using UnityEngine;
+using System.Collections;
+
 
 public class Player : MonoBehaviour
 {
+    public int health = 100;
     public float moveSpeed = 5f;
     public float jumpForce = 10f;
 
@@ -11,28 +14,50 @@ public class Player : MonoBehaviour
 
     private Rigidbody2D rb;
     private Animator animator;
+    private SpriteRenderer spriteRenderer;
+
 
     private bool isGrounded;
+    public int extraJumpsValue = 1;
+    private int extraJumps;
 
     void Start()
+{
+    rb = GetComponent<Rigidbody2D>();
+    animator = GetComponent<Animator>();
+
+    extraJumps = extraJumpsValue;
+
+    spriteRenderer = GetComponent<SpriteRenderer>();
+}
+
+void Update()
+{
+    float moveInput = Input.GetAxis("Horizontal");
+
+    rb.linearVelocity = new Vector2(moveInput * moveSpeed, rb.linearVelocity.y);
+
+    if (isGrounded)
     {
-        rb = GetComponent<Rigidbody2D>();
-        animator = GetComponent<Animator>();
+        extraJumps = extraJumpsValue;
     }
 
-    void Update()
+    if (Input.GetKeyDown(KeyCode.Space))
     {
-        float moveInput = Input.GetAxis("Horizontal");
-
-        rb.linearVelocity = new Vector2(moveInput * moveSpeed, rb.linearVelocity.y);
-
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        if (isGrounded)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
         }
-
-        SetAnimation(moveInput);
+        else if (extraJumps > 0)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+            extraJumps--;
+        }
     }
+
+    SetAnimation(moveInput);
+}
+
 
     private void FixedUpdate()
     {
@@ -68,4 +93,33 @@ public class Player : MonoBehaviour
             }
         }
     }
+    private void OnCollisionEnter2D(Collision2D collision)
+{
+    if (collision.gameObject.tag == "Damage")
+    {
+        health -= 25;
+
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+
+        StartCoroutine(BlinkRed());
+
+        if (health <= 0)
+        {
+            Die();
+        }
+    }
+}
+
+private IEnumerator BlinkRed()
+{
+    spriteRenderer.color = Color.red;
+    yield return new WaitForSeconds(0.1f);
+    spriteRenderer.color = Color.white;
+}
+
+private void Die()
+{
+    UnityEngine.SceneManagement.SceneManager.LoadScene("SampleScene");
+}
+
 }
